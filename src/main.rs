@@ -1,9 +1,11 @@
-mod lex;
 mod exe;
+mod lex;
+mod parse;
 use clap::Parser;
-use lex::Lexer;
 use exe::Runner;
-use std::fs::read_to_string;
+use lex::Lexer;
+use parse::SyntaxParser;
+use std::{fs::read_to_string, process::exit};
 
 /// It compiles the program and give the <filename>.exe file
 #[derive(Parser, Debug)]
@@ -18,7 +20,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let file = &args.file;
 
     if !file.ends_with(".bf") {
-        panic!("The extension of the file should be .bf");
+        eprintln!("The extension of the file should be .bf");
+        exit(1);
     }
 
     let content = read_to_string(args.file)?;
@@ -26,6 +29,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut lexer = Lexer::new(content);
 
     lexer.parse();
+    
+    for token in lexer.tokens().iter() {
+        println!("{:?}", token);
+    }
+
+    let mut syntax = SyntaxParser::new(lexer.tokens());
+
+    syntax.parse();
 
     let mut runner = Runner::new(lexer.tokens());
     runner.run();

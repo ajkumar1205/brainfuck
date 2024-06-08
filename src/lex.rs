@@ -17,15 +17,8 @@ impl Lexer {
         }
     }
 
-    pub fn current(&self) -> usize {
-        self.current
-    }
-
     pub fn parse(&mut self) {
-        let mut i = 1;
         while self.current < self.input.len() {
-            println!("{}", i);
-            i += 1;
             let c = self.input.chars().nth(self.current).unwrap();
             match c {
                 '+' => {
