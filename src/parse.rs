@@ -1,4 +1,3 @@
-use std::process::exit;
 
 use crate::lex::{Token, TokenType};
 
@@ -15,7 +14,7 @@ impl SyntaxParser {
         }
     }
 
-    pub fn parse(&mut self) {
+    pub fn parse(&mut self) -> Result<(), String> {
         for token in self.tokens.iter() {
             
             match token.token_type() {
@@ -24,8 +23,7 @@ impl SyntaxParser {
                 }
                 TokenType::LoopEnd => {
                     if self.stack.is_empty() {
-                        eprintln!("Syntax Error: Unmatched LoopEnd");
-                        exit(1);
+                        return Err("Syntax Error: Unmatched LoopEnd".to_string());
                     }
                     self.stack.pop();
                 }
@@ -34,8 +32,9 @@ impl SyntaxParser {
         }
 
         if !self.stack.is_empty() {
-            eprintln!("Syntax Error: Unmatched LoopStart");
-            exit(1);
+            return Err("Syntax Error: Unmatched LoopStart".to_string());
         }
+
+        Ok(())
     }
 }

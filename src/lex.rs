@@ -17,7 +17,7 @@ impl Lexer {
         }
     }
 
-    pub fn parse(&mut self) {
+    pub fn parse(&mut self) -> Result<(), String> {
         while self.current < self.input.len() {
             let c = self.input.chars().nth(self.current).unwrap();
             match c {
@@ -109,10 +109,10 @@ impl Lexer {
                     self.advance();
                 }
                 _ => {
-                    panic!(
+                    return Err(format!(
                         "Unexpected character `{}` at col {} on line {}",
                         c, self.col, self.line
-                    )
+                    ));
                 }
             }
         }
@@ -123,6 +123,8 @@ impl Lexer {
             line: self.line,
             col: self.col,
         });
+
+        Ok(())
     }
 
     fn advance(&mut self) {
@@ -146,6 +148,15 @@ impl Lexer {
     pub fn tokens(&self) -> Vec<Token> {
         self.tokens.clone()
     }
+
+    // pub fn eof(&mut self) {
+    //     self.tokens.push(Token {
+    //         token_type: TokenType::Eof,
+    //         pos: self.current,
+    //         line: self.line,
+    //         col: self.col,
+    //     });
+    // }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

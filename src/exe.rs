@@ -3,6 +3,7 @@ use std::io::Read;
 use crate::lex::{Token, TokenType};
 
 pub struct Runner {
+    ins: usize,
     ptr: usize,
     tokens: Vec<Token>,
     stack: Vec<(usize, usize)>,
@@ -12,6 +13,7 @@ pub struct Runner {
 impl Runner {
     pub fn new(tokens: Vec<Token>) -> Self {
         Self {
+            ins: 0,
             ptr: 0,
             tokens,
             stack: Vec::new(),
@@ -20,9 +22,8 @@ impl Runner {
     }
 
     pub fn run(&mut self) {
-        let mut i = 0;
-        while i < self.tokens.len() {
-            let tk = &self.tokens[i];
+        while self.ins < self.tokens.len() {
+            let tk = &self.tokens[self.ins];
             match tk.token_type() {
                 TokenType::Increment => {
                     self.tape[self.ptr] = self.tape[self.ptr].wrapping_add(1);
@@ -31,19 +32,19 @@ impl Runner {
                     self.tape[self.ptr] = self.tape[self.ptr].wrapping_sub(1);
                 }
                 TokenType::MoveRight => {
-                    self.ptr += 1;
+                    self.ptr = (self.ptr + 1) % 30000;
                 }
                 TokenType::MoveLeft => {
-                    self.ptr -= 1;
+                    self.ptr = (self.ptr + 30000 - 1) % 30000;
                 }
                 TokenType::LoopStart => {
-                    self.stack.push((self.ptr, i));
+                    self.stack.push((self.ptr, self.ins));
                 }
                 TokenType::LoopEnd => {
                     if self.tape[self.stack.last().unwrap().0] == 0 {
                         self.stack.pop();
                     } else {
-                        i = self.stack.last().unwrap().1;
+                        self.ins = self.stack.last().unwrap().1;
                     }
                 }
                 TokenType::Print => {
@@ -54,12 +55,13 @@ impl Runner {
                     std::io::stdin().read_exact(&mut buffer).unwrap();
                     self.tape[self.ptr] = buffer[0];
                 }
-                TokenType::Eof => {
-                    break;
-                }
+                _ => {}
             }
-            i += 1;
+            self.ins += 1;
         }
     }
 
+    pub fn add(&mut self, tokens: &mut Vec<Token>) {
+        self.tokens.append(tokens);
+    }
 }
