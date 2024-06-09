@@ -160,10 +160,6 @@ impl Token {
     pub fn token_type(&self) -> TokenType {
         self.token_type
     }
-
-    pub fn pos(&self) -> usize {
-        self.pos
-    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

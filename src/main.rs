@@ -25,14 +25,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     let content = read_to_string(args.file)?;
-    println!("{}", content);
+    
     let mut lexer = Lexer::new(content);
 
     lexer.parse();
-    
-    for token in lexer.tokens().iter() {
-        println!("{:?}", token);
-    }
 
     let mut syntax = SyntaxParser::new(lexer.tokens());
 
