@@ -48,10 +48,10 @@ impl Runner {
                     }
                 }
                 TokenType::Print => {
-                    print!("{}", self.tape[self.ptr] as char);
+                    print!("{}", String::from_utf8_lossy(&[self.tape[self.ptr]]));
                 }
                 TokenType::Read => {
-                    let mut buffer = vec![];
+                    let mut buffer = vec![0];
                     std::io::stdin().read_exact(&mut buffer).unwrap();
                     self.tape[self.ptr] = buffer[0];
                 }

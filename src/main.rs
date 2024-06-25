@@ -1,4 +1,5 @@
 mod exe;
+mod ir;
 mod lex;
 mod parse;
 use colored::Colorize;
@@ -118,7 +119,6 @@ fn run_prompt() {
                 continue;
             }
         }
-        println!();
         runner.add(&mut lexer.tokens());
         runner.run();
         println!();
