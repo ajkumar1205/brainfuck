@@ -8,7 +8,7 @@ pub struct Representation {
 impl Representation {
     pub fn new() -> Self {
         Representation { instructions: vec![] }
-    }
+    } 
 
     pub fn parse(&mut self, tokens: Vec<Token>){
         let mut i = 0;
