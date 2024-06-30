@@ -14,11 +14,15 @@ impl Representation {
         let mut i = 0;
         let mut last =  TokenType::Eof;
         for token in tokens {
-            match token.token_type() {
-                TokenType::Increment if last == TokenType::Increment => {
-                    i += 1;
+            let t =  token.token_type();
+            
+            if t == TokenType::Print {
+                if i != 0 {
+                    self.instructions.push(Instruction::Write((i-1) as *const u8));
+                } 
+                if i==0 {
+                    
                 }
-                _ => {}
             }
         }
     }
