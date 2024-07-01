@@ -34,7 +34,7 @@ impl Representation {
                 }
                 TokenType::MoveLeft => {
                     ptr = (ptr + 30000 - 1) % 30000;
-                    count = Representation::get();
+                    count = self.get();
                 }
                 TokenType::MoveRight => {
                     ptr = (ptr + 1) % 30000;
@@ -53,7 +53,7 @@ impl Representation {
     // GET THE VALUE IN THE PREVIOUS INDEX 
     // SO THAT WE CAN MOVE LEFT RIGHT WITH 
     // CORRECT VALUES FOR SUMMATION
-    fn get() -> i32 {
+    fn get(&self) -> i32 {
         0
     }
 }
