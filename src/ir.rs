@@ -15,7 +15,6 @@ impl Representation {
     pub fn parse(&mut self, tokens: Vec<Token>) {
         let mut count = 0;
         let mut ptr = 0;
-        let mut last = TokenType::Eof;
 
         for token in tokens {
             
