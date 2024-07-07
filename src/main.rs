@@ -78,8 +78,8 @@ fn run_prompt() {
     }
     let mut runner = Runner::new(vec![]);
 
-    print!("{} ", ">>>".green());
     loop {
+        print!("{} ", ">>>".green());
         match std::io::stdout().flush() {
             Ok(_) => {}
             Err(_) => {
@@ -96,6 +96,27 @@ fn run_prompt() {
                 exit(1);
             }
         }
+        if input.trim().starts_with("print ") {
+            let s = input.replace("print ", "")
+                                .replace(" ", "");
+
+            let mut i = 0;
+            for c in s.chars() {
+                if ! c.is_numeric() {
+                    break;
+                }
+                i = i * 10 + (c as usize - '0' as usize);
+            }
+
+            if i == 0 {
+                i = 10;
+            }
+
+            runner.print_tape(i);
+            println!();
+            continue;
+        }
+
         if input.trim() == "exit" {
             exit(0);
         }
@@ -122,7 +143,6 @@ fn run_prompt() {
         runner.add(&mut lexer.tokens());
         runner.run();
         println!();
-        print!("{} ", ">>>".green());
     }
 }
 

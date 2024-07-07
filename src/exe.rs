@@ -51,7 +51,7 @@ impl Runner {
                     print!("{}", String::from_utf8_lossy(&[self.tape[self.ptr]]));
                 }
                 TokenType::Read => {
-                    let mut buffer = vec![0];
+                    let mut buffer = [0; 1];
                     std::io::stdin().read_exact(&mut buffer).unwrap();
                     self.tape[self.ptr] = buffer[0];
                 }
@@ -63,5 +63,11 @@ impl Runner {
 
     pub fn add(&mut self, tokens: &mut Vec<Token>) {
         self.tokens.append(tokens);
+    }
+
+    pub fn print_tape(&self, val: usize) {
+        for i in 0..val {
+            print!("{} ", self.tape[i]);
+        }
     }
 }
