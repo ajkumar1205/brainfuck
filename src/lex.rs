@@ -145,8 +145,8 @@ impl Lexer {
         }
     }
 
-    pub fn tokens(&self) -> Vec<Token> {
-        self.tokens.clone()
+    pub fn tokens(&self) -> &Vec<Token> {
+        &self.tokens
     }
 
     // pub fn eof(&mut self) {

@@ -3,8 +3,7 @@ use crate::lex::{Token, TokenType};
 pub struct Representation {
     pub instructions: Vec<Instruction>,
 }
-// Change it according to standard
-// Added
+
 impl Representation {
     pub fn new() -> Self {
         Representation {
@@ -12,7 +11,7 @@ impl Representation {
         }
     }
 
-    pub fn parse(&mut self, tokens: Vec<Token>) {
+    pub fn parse(&mut self, tokens: &Vec<Token>) {
         let mut count = 0;
         let mut ptr = 0;
 
@@ -20,23 +19,42 @@ impl Representation {
             
             match token.token_type() {
                 TokenType::Print => {
+                    if count != 0 {
+                        self.instructions.push(Instruction::Sum(count, ptr));
+                    }
                     self.instructions.push(Instruction::Print(ptr));
                 }
                 TokenType::Read => {
+                    if count != 0 {
+                        self.instructions.push(Instruction::Sum(count, ptr));
+                    }
                     self.instructions.push(Instruction::Read(ptr));
                 }
                 TokenType::LoopStart => {
+                    if count != 0 {
+                        self.instructions.push(Instruction::Sum(count, ptr));
+                    }
                     self.instructions.push(Instruction::LoopStart(ptr));
                 }
                 TokenType::LoopEnd => {
+                    if count != 0 {
+                        self.instructions.push(Instruction::Sum(count, ptr));
+                    }
                     self.instructions.push(Instruction::LoopEnd(ptr));
                 }
                 TokenType::MoveLeft => {
+                    if count != 0 {
+                        self.instructions.push(Instruction::Sum(count, ptr));
+                    }
                     ptr = (ptr + 30000 - 1) % 30000;
-                    count = self.get();
+                    count = self.get(ptr);
                 }
                 TokenType::MoveRight => {
+                    if count != 0 {
+                        self.instructions.push(Instruction::Sum(count, ptr));
+                    }
                     ptr = (ptr + 1) % 30000;
+                    count = self.get(ptr);
                 }
                 TokenType::Increment => {
                     count = count + 1;
@@ -49,10 +67,14 @@ impl Representation {
         }
     }
 
-    // GET THE VALUE IN THE PREVIOUS INDEX 
-    // SO THAT WE CAN MOVE LEFT RIGHT WITH 
-    // CORRECT VALUES FOR SUMMATION
-    fn get(&self) -> i32 {
+    fn get(&self, ptr: usize) -> i32 {
+        for i in self.instructions.len()-1..0 {
+            if let Instruction::Sum(x, y) = self.instructions[i] {
+                if ptr == y {
+                    return x;
+                }
+            }
+        } 
         0
     }
 }

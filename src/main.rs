@@ -6,7 +6,8 @@ use colored::Colorize;
 use exe::Runner;
 use lex::Lexer;
 use parse::SyntaxParser;
-use std::{fs::read_to_string, io::Write, process::exit};
+use ir::Representation;
+use std::{clone, fs::read_to_string, io::Write, process::exit};
 
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
@@ -53,9 +54,9 @@ fn run_file(file: &String) {
         }
     }
 
-    let mut syntax = SyntaxParser::new(lexer.tokens());
+    let mut syntax = SyntaxParser::new();
 
-    match syntax.parse() {
+    match syntax.parse(lexer.tokens()) {
         Ok(_) => {}
         Err(e) => {
             eprintln!("{}", e.red());
@@ -63,8 +64,11 @@ fn run_file(file: &String) {
         }
     }
 
-    let mut runner = Runner::new(lexer.tokens());
+    let mut rep = Representation::new();
+    rep.parse(lexer.tokens());
+    let mut runner = Runner::new(lexer.tokens().clone());
     runner.run();
+    
 }
 
 fn run_prompt() {
@@ -131,16 +135,16 @@ fn run_prompt() {
             }
         }
 
-        let mut syntax = SyntaxParser::new(lexer.tokens());
+        let mut syntax = SyntaxParser::new();
 
-        match syntax.parse() {
+        match syntax.parse(lexer.tokens()) {
             Ok(_) => {}
             Err(e) => {
                 eprintln!("{}", e.red());
                 continue;
             }
         }
-        runner.add(&mut lexer.tokens());
+        runner.add(&mut lexer.tokens().clone());
         runner.run();
         println!();
     }
