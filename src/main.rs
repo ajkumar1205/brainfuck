@@ -7,7 +7,7 @@ use exe::Runner;
 use lex::Lexer;
 use parse::SyntaxParser;
 use ir::Representation;
-use std::{clone, fs::read_to_string, io::Write, process::exit};
+use std::{fs::read_to_string, io::Write, process::exit};
 
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
@@ -66,9 +66,14 @@ fn run_file(file: &String) {
 
     let mut rep = Representation::new();
     rep.parse(lexer.tokens());
+
+    for ins in &rep.instructions {
+        println!("{:?}", ins);
+    }
+
     let mut runner = Runner::new(lexer.tokens().clone());
     runner.run();
-    
+
 }
 
 fn run_prompt() {

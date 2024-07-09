@@ -79,6 +79,7 @@ impl Representation {
     }
 }
 
+#[derive(Debug)]
 pub enum Instruction {
     Sum(i32, usize),
     Read(usize),

@@ -1,6 +1,6 @@
 use std::io::Read;
 
-use crate::lex::{Token, TokenType};
+use crate::{ir::Instruction, lex::{Token, TokenType}};
 
 pub struct Runner {
     ins: usize,
@@ -58,6 +58,28 @@ impl Runner {
                 _ => {}
             }
             self.ins += 1;
+        }
+    }
+
+    // Try to implement the loop handling and rest of it is already done.
+    pub fn run_ins(&mut self, ins: &Vec<Instruction>){
+        let mut i = 0;
+        while true {
+            let is = &ins[i];
+            match is {
+                Instruction::Print(ptr) => {
+                    print!("{}", self.tape[*ptr]);
+                }
+                Instruction::Sum(val, ptr) => {
+                    self.tape[*ptr] = self.tape[*ptr].wrapping_add(*val as u8);
+                }
+                Instruction::Read(ptr) => {
+                    let mut buffer = [0; 1];
+                    std::io::stdin().read_exact(&mut buffer).unwrap();
+                    self.tape[*ptr] = buffer[0];
+                }
+                _ => {}
+            }
         }
     }
 
