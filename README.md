@@ -12,4 +12,5 @@ Usage: brainfuck <subcommand>
 <null>                Runs the brainfuck CLI
 <file>.bf             Runs the source code
 -h, --help            Prints this message
+-c <file>.bf          Compiles the file
 ```

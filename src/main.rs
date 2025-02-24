@@ -167,10 +167,14 @@ fn help() {
         "brainfuck <subcommand>\n".green().bold().underline()
     );
 
-    println!("          Subcommands");
-    println!("<null>                Runs the brainfuck CLI");
-    println!("{}             Runs the source code", "<file>.bf".yellow());
-    println!("{}            Prints this message", "-h, --help".yellow());
+    println!("              Subcommands");
+    println!("<null>                     Runs the brainfuck CLI");
+    println!("{}                  Runs the source code", "<file>.bf".yellow());
+    println!(
+        "{}    Compiles the source code",
+        "-c, --compile <file>.bf".yellow()
+    );
+    println!("{}                 Prints this message", "-h, --help".yellow());
 }
 
 fn compile_file(file: &String) -> Result<(), String> {
@@ -178,15 +182,16 @@ fn compile_file(file: &String) -> Result<(), String> {
         return Err("File must have .bf extension".to_string());
     }
 
-    let content = std::fs::read_to_string(file)
-        .map_err(|e| format!("Failed to read file: {}", e))?;
+    let content =
+        std::fs::read_to_string(file).map_err(|e| format!("Failed to read file: {}", e))?;
 
     let mut lexer = Lexer::new(content);
     lexer.parse().map_err(|e| format!("Lexer error: {}", e))?;
 
     let mut syntax = SyntaxParser::new();
-    syntax.parse(lexer.tokens())
-          .map_err(|e| format!("Parser error: {}", e))?;
+    syntax
+        .parse(lexer.tokens())
+        .map_err(|e| format!("Parser error: {}", e))?;
 
     let mut rep = Representation::new();
     rep.parse(lexer.tokens());
@@ -195,8 +200,7 @@ fn compile_file(file: &String) -> Result<(), String> {
     let asm = gen.generate(&rep.instructions);
 
     let output_asm = file.replace(".bf", ".asm");
-    std::fs::write(&output_asm, asm)
-        .map_err(|e| format!("Failed to write ASM file: {}", e))?;
+    std::fs::write(&output_asm, asm).map_err(|e| format!("Failed to write ASM file: {}", e))?;
 
     // Output executable name will be the same as the input file but without extension
     let output_exe = file.replace(".bf", "");
@@ -224,8 +228,7 @@ fn compile_file(file: &String) -> Result<(), String> {
     }
 
     // Delete the generated .asm file now that compilation was successful.
-    std::fs::remove_file(&output_asm)
-        .map_err(|e| format!("Failed to remove ASM file: {}", e))?;
+    std::fs::remove_file(&output_asm).map_err(|e| format!("Failed to remove ASM file: {}", e))?;
 
     Ok(())
 }
