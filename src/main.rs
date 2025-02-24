@@ -1,12 +1,14 @@
 mod exe;
+mod fasm;
 mod ir;
 mod lex;
 mod parse;
 use colored::Colorize;
 use exe::Runner;
+use fasm::FasmGenerator;
+use ir::Representation;
 use lex::Lexer;
 use parse::SyntaxParser;
-use ir::Representation;
 use std::{fs::read_to_string, io::Write, process::exit};
 
 fn main() {
@@ -14,7 +16,7 @@ fn main() {
 
     if args.len() == 1 {
         run_prompt();
-    } else if args.len() > 2 {
+    } else if args.len() > 3 {
         eprintln!("{}", "Too many arguments".red());
         help();
         exit(1);
@@ -23,6 +25,11 @@ fn main() {
             help();
         } else {
             run_file(&args[1]);
+        }
+    } else if args[1] == "-c" || args[1] == "--compile" {
+        match compile_file(&args[2]) {
+            Ok(_) => println!("{}", "Compilation successful".green()),
+            Err(e) => eprintln!("{}: {}", "Compilation failed".red(), e),
         }
     }
 }
@@ -73,7 +80,6 @@ fn run_file(file: &String) {
 
     let mut runner = Runner::new(lexer.tokens().clone());
     runner.run();
-
 }
 
 fn run_prompt() {
@@ -106,12 +112,11 @@ fn run_prompt() {
             }
         }
         if input.trim().starts_with("print ") {
-            let s = input.replace("print ", "")
-                                .replace(" ", "");
+            let s = input.replace("print ", "").replace(" ", "");
 
             let mut i = 0;
             for c in s.chars() {
-                if ! c.is_numeric() {
+                if !c.is_numeric() {
                     break;
                 }
                 i = i * 10 + (c as usize - '0' as usize);
@@ -166,4 +171,61 @@ fn help() {
     println!("<null>                Runs the brainfuck CLI");
     println!("{}             Runs the source code", "<file>.bf".yellow());
     println!("{}            Prints this message", "-h, --help".yellow());
+}
+
+fn compile_file(file: &String) -> Result<(), String> {
+    if !file.ends_with(".bf") {
+        return Err("File must have .bf extension".to_string());
+    }
+
+    let content = std::fs::read_to_string(file)
+        .map_err(|e| format!("Failed to read file: {}", e))?;
+
+    let mut lexer = Lexer::new(content);
+    lexer.parse().map_err(|e| format!("Lexer error: {}", e))?;
+
+    let mut syntax = SyntaxParser::new();
+    syntax.parse(lexer.tokens())
+          .map_err(|e| format!("Parser error: {}", e))?;
+
+    let mut rep = Representation::new();
+    rep.parse(lexer.tokens());
+
+    let mut gen = FasmGenerator::new();
+    let asm = gen.generate(&rep.instructions);
+
+    let output_asm = file.replace(".bf", ".asm");
+    std::fs::write(&output_asm, asm)
+        .map_err(|e| format!("Failed to write ASM file: {}", e))?;
+
+    // Output executable name will be the same as the input file but without extension
+    let output_exe = file.replace(".bf", "");
+
+    // Run FASM to compile directly to an executable
+    let status = std::process::Command::new("fasm")
+        .args([&output_asm, &output_exe])
+        .status()
+        .map_err(|e| format!("Failed to run FASM: {}", e))?;
+
+    if !status.success() {
+        return Err("FASM compilation failed".to_string());
+    }
+
+    // Make the output file executable
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let metadata = std::fs::metadata(&output_exe)
+            .map_err(|e| format!("Failed to get file metadata: {}", e))?;
+        let mut perms = metadata.permissions();
+        perms.set_mode(0o755); // rwxr-xr-x
+        std::fs::set_permissions(&output_exe, perms)
+            .map_err(|e| format!("Failed to set file permissions: {}", e))?;
+    }
+
+    // Delete the generated .asm file now that compilation was successful.
+    std::fs::remove_file(&output_asm)
+        .map_err(|e| format!("Failed to remove ASM file: {}", e))?;
+
+    Ok(())
 }

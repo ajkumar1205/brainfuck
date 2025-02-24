@@ -64,7 +64,7 @@ impl Runner {
     // Try to implement the loop handling and rest of it is already done.
     pub fn run_ins(&mut self, ins: &Vec<Instruction>){
         let mut i = 0;
-        while true {
+        while i < ins.len() {
             let is = &ins[i];
             match is {
                 Instruction::Print(ptr) => {
@@ -77,6 +77,32 @@ impl Runner {
                     let mut buffer = [0; 1];
                     std::io::stdin().read_exact(&mut buffer).unwrap();
                     self.tape[*ptr] = buffer[0];
+                }
+                Instruction::LoopStart(ptr) => {
+                    if self.tape[*ptr] == 0 {
+                        let mut count = 1;
+                        while count != 0 {
+                            i += 1;
+                            match ins[i] {
+                                Instruction::LoopStart(_) => count += 1,
+                                Instruction::LoopEnd(_) => count -= 1,
+                                _ => {}
+                            }
+                        }
+                    }
+                }
+                Instruction::LoopEnd(ptr) => {
+                    if self.tape[*ptr] != 0 {
+                        let mut count = 1;
+                        while count != 0 {
+                            i -= 1;
+                            match ins[i] {
+                                Instruction::LoopStart(_) => count -= 1,
+                                Instruction::LoopEnd(_) => count += 1,
+                                _ => {}
+                            }
+                        }
+                    }
                 }
                 _ => {}
             }
